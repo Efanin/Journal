@@ -8,12 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Настройка ограничений запросов
 builder.Services.Configure<IISServerOptions>(options =>
 {
-    options.MaxRequestBodySize = 10 * 1024 * 1024; // 10MB
+    options.MaxRequestBodySize = 100 * 1024 * 1024; // 100MB
 });
 
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10MB
+    options.MultipartBodyLengthLimit = 100 * 1024 * 1024; // 100MB
     options.ValueLengthLimit = 1024 * 1024; // 1MB per field
     options.MultipartBoundaryLengthLimit = 256;
 });
@@ -21,7 +21,7 @@ builder.Services.Configure<FormOptions>(options =>
 // Настройка ограничений Kestrel
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10MB
+    options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100MB
 });
 // Add services to the container.
 builder.Services.AddControllersWithViews();

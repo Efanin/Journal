@@ -78,7 +78,7 @@ namespace Journal.Controllers
                     authProperties);
                 return RedirectToAction("Privacy", "Home");
             }
-            return View("Index");
+            return RedirectToAction("Index", "Home");
         }
 
         public async Task<IActionResult> Logout()
@@ -88,10 +88,38 @@ namespace Journal.Controllers
         }
         public IActionResult Main()
         {
-            return View();
+            connection.Open();
+            SqlCommand command = new(
+                "select * from Human where (Email=@Email)",
+                connection
+                );
+            command.Parameters.AddWithValue("Email", HttpContext.User.Identity.Name);
+            SqlDataReader reader = command.ExecuteReader();
+            HumanModel humanModel = null;
+            
+            while (reader.Read())
+            {
+                byte[] filedb = (byte[])reader["Photo"];
+                var stream = new MemoryStream(filedb);
+                IFormFile file = new FormFile(stream, 0, filedb.Length, "image", "image.png");
+                string savePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/file", file.FileName);
+                using (var stream1 = new FileStream(savePath, FileMode.Create))
+                {
+                    file.CopyTo(stream1);
+                }
+                humanModel = new(
+                    Convert.ToString(reader["Email"]),
+                    Convert.ToString(reader["Name"]),
+                    Convert.ToString(reader["Age"]),
+                    Convert.ToString(reader["Info"]),
+                    "/file/image.png"
+                    );
+            }
+            reader.Close();
+            return View(humanModel);
         }
         [HttpPost]
-        public IActionResult Human(IFormFile file)
+        public async Task<IActionResult> Human(FileModel file)
         {
             
             string Email = HttpContext.User.Identity.Name;
@@ -99,7 +127,7 @@ namespace Journal.Controllers
             string Age = "26";
             string Info = "super hacker";
             using var memoryStream = new MemoryStream();
-            file.CopyTo(memoryStream);
+            file.FileImage.CopyTo(memoryStream);
             byte[] filedb = memoryStream.ToArray();
             connection.Open();
             SqlCommand command = new(
