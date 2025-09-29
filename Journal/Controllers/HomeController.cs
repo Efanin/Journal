@@ -156,7 +156,7 @@ namespace Journal.Controllers
         public async Task<IActionResult> AddWorkDB(HomeWorkModel homeWorkModel)
         {
             await Console.Out.WriteLineAsync(homeWorkModel.Info);
-            if(homeWorkModel.FileWork.Length < 100 * 1024 * 1024)
+            if (homeWorkModel.FileWork.Length < 100 * 1024 * 1024)
             {
                 string savePath = Path.Combine(
                     Directory.GetCurrentDirectory(),
@@ -169,12 +169,17 @@ namespace Journal.Controllers
                 using var memoryStream = new MemoryStream();
                 homeWorkModel.FileWork.CopyTo(memoryStream);
                 byte[] filedb = memoryStream.ToArray();
+
+                connection.Open();
+                SqlCommand command = new(
+                    "insert into HomeWork (Info,NameWork,FileWork) values(@Info,@NameWork,@FileWork)",
+                    connection
+                    );
+                command.Parameters.AddWithValue("Info", homeWorkModel.Info);
+                command.Parameters.AddWithValue("NameWork", homeWorkModel.FileWork.FileName);
+                command.Parameters.AddWithValue("FileWork", filedb);
+                command.ExecuteNonQuery();
             }
-            connection.Open();
-            SqlCommand command = new(
-                "insert into HomeWork (Info,NameWork,FileWork) values(@Info,@NameWork,@FileWork)",
-                connection
-                );
             return RedirectToAction("AddWork", "Home");
         }
 
