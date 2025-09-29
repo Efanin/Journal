@@ -1,0 +1,11 @@
+﻿@model HomeWorkModel
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<form method="post" asp-action="AddWorkDB" asp-controller="Home" enctype="multipart/form-data">
+    <input asp-for="Info" type="text" />
+    <input asp-for="FileWork" type="file" />
+    <button type="submit">Send</button>
+</form>

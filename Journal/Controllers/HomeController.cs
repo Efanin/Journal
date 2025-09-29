@@ -144,6 +144,41 @@ namespace Journal.Controllers
         }
 
 
+        public IActionResult HomeWork()
+        {
+            return View();
+        }
+        public IActionResult AddWork()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> AddWorkDB(HomeWorkModel homeWorkModel)
+        {
+            await Console.Out.WriteLineAsync(homeWorkModel.Info);
+            if(homeWorkModel.FileWork.Length < 100 * 1024 * 1024)
+            {
+                string savePath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot/file",
+                    homeWorkModel.FileWork.FileName);
+                using (var stream = new FileStream(savePath, FileMode.Create))
+                {
+                    homeWorkModel.FileWork.CopyTo(stream);
+                }
+                using var memoryStream = new MemoryStream();
+                homeWorkModel.FileWork.CopyTo(memoryStream);
+                byte[] filedb = memoryStream.ToArray();
+            }
+            connection.Open();
+            SqlCommand command = new(
+                "insert into HomeWork (Info,NameWork,FileWork) values(@Info,@NameWork,@FileWork)",
+                connection
+                );
+            return RedirectToAction("AddWork", "Home");
+        }
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
